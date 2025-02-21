@@ -1,0 +1,231 @@
+using Godot;
+using System;
+using System.Collections.Generic;
+using System.Reflection.Metadata;
+
+public partial class PlayerController : CharacterBody3D
+{
+    [Export] public Node3D Camera;
+	[Export] public Cap Cap;
+    public bool Active = true;
+    public const float MaxRunningVelocity = 7.0f;
+    public const float Acceleration = 30.0f;
+    public readonly struct JumpMultiplier
+    {
+        public const float BaseJumpVelocity = 12.0f;
+        public readonly float VelocityMultiplier;
+        public float NewJumpVelocity => BaseJumpVelocity * VelocityMultiplier;
+        public JumpMultiplier(float VelocityMultiplier) => this.VelocityMultiplier = VelocityMultiplier;
+    }
+    
+    public JumpMultiplier FirstJump = new(1f);
+    public JumpMultiplier SecondJump = new(1.1f);
+    public JumpMultiplier ThirdJump = new(1.5f);
+    public JumpMultiplier GroundpoundJump = new(1.4f);
+    public JumpMultiplier CapJump = new(1.15f);
+    public JumpMultiplier LastJump;
+    public const float WallKickMinVelocity = 10f;
+    public const float DiveVelocity = 10f;
+    public const float MultiJumpResetCooldown = 2f;
+	public const float AirAccelerationMultiplier = 0.5f;
+	public Vector3 InputDirection = Vector3.Zero;
+	public bool IsMoving => InputDirection != Vector3.Zero;
+    public bool CapJumpNextFrame = false;
+    public bool IsDiving = false;
+    public const float DivingAccelerationMultiplier = 0.1f;
+    public const float GroundPoundingAccelerationMultiplier = 0.01f;
+    public Dictionary<string,float> CoolDowns = new();
+    public HashSet<string> CoolDownsRemovedThisFrame = new();
+    public const float CapThrowCoolDown = 0.5f;
+    public const float GroundPoundJumpOpeningCoolDown = 0.5f;
+    public const float CoyoteJumpOpeningCoolDown = 0.2f;
+    public bool IsGroundPounding = false;
+    public float GroundPoundFreezeLength = 0.5f;
+    public bool IsBonked = false;
+    public float MaxVelocity = MaxRunningVelocity;
+    public float ReturnToRunningDeceleration = 2f;
+    private Vector3 LastSecondJumpDirection = Vector3.Zero; 
+    public override void _Process(double delta)
+    {
+        CoolDownsRemovedThisFrame.Clear();
+        foreach (var key in CoolDowns.Keys)
+        {
+            CoolDowns[key] -= (float)delta;
+            if (CoolDowns[key] <= 0)
+            {
+                CoolDowns.Remove(key);
+                CoolDownsRemovedThisFrame.Add(key);
+            }
+                
+        }
+		Vector3 newVelocity = Velocity;
+        Vector2 inputDir = Input.GetVector("Left", "Right", "Forward", "Backward");
+        InputDirection = Camera.GlobalTransform.Basis * new Vector3(inputDir.X, 0, inputDir.Y);
+
+		InputDirection.Y = 0; 
+		InputDirection = InputDirection.Normalized();
+
+        float realAcceleration = Acceleration;
+        if(IsDiving)
+        {
+            realAcceleration *= DivingAccelerationMultiplier;
+        }
+        else if(IsGroundPounding)
+        {
+            realAcceleration *= GroundPoundingAccelerationMultiplier;
+        }
+        else if(!IsOnFloor())
+        {
+            realAcceleration *= AirAccelerationMultiplier;
+        }
+
+        Vector3 targetVelocity = InputDirection * MaxVelocity * inputDir.Length();
+        newVelocity.X = Mathf.MoveToward(newVelocity.X, targetVelocity.X, realAcceleration * (float)delta);
+        newVelocity.Y += GetGravity().Y * (float)delta;
+        newVelocity.Z = Mathf.MoveToward(newVelocity.Z, targetVelocity.Z, realAcceleration * (float)delta);
+		
+        if (IsMoving && !CoolDowns.ContainsKey("GroundPoundFreeze"))
+        {
+            GlobalTransform = GlobalTransform.InterpolateWith(GlobalTransform.LookingAt( GlobalPosition + InputDirection ), (float)delta * realAcceleration );
+        }
+
+        if(CoolDownsRemovedThisFrame.Contains("GroundPoundFreeze") && !IsDiving)
+        {
+            newVelocity.Y = GetGravity().Y * GroundPoundFreezeLength;
+            IsGroundPounding = true;
+        }
+        else if(CoolDowns.ContainsKey("GroundPoundFreeze"))
+        {
+            newVelocity.X = Mathf.MoveToward(newVelocity.X, 0f, GroundPoundFreezeLength * 100 * (float)delta);
+            newVelocity.Y = Mathf.MoveToward(newVelocity.Y, 0f, GroundPoundFreezeLength * 100 * (float)delta * 10);
+            newVelocity.Z = Mathf.MoveToward(newVelocity.Z, 0f, GroundPoundFreezeLength * 100 * (float)delta);
+        }
+
+        if(Input.IsActionJustPressed("Jump"))
+        {
+            CoolDowns["CoyoteJumpOpening"] = CoyoteJumpOpeningCoolDown;
+        }
+
+        if(IsOnFloor() || CapJumpNextFrame )
+        {
+            IsDiving = false;
+            if (!CoolDowns.ContainsKey("GroundPoundJumpOpening") && IsGroundPounding)
+            {
+                CoolDowns["GroundPoundJumpOpening"] = GroundPoundJumpOpeningCoolDown;
+            }
+            IsGroundPounding = false;
+            
+            MaxVelocity = Mathf.MoveToward( MaxVelocity, MaxRunningVelocity, ReturnToRunningDeceleration * (float)delta );
+            
+        }
+        
+        
+        if (CapJumpNextFrame || (CoolDowns.ContainsKey("CoyoteJumpOpening") && IsOnFloor() && !CoolDowns.ContainsKey("GroundPoundFreeze")))
+        {
+            Input.ActionRelease("GroundPound");
+            JumpMultiplier NextJump = FirstJump;
+            CoolDowns["CoyoteJumpOpening"] = 0f;
+
+            if(CapJumpNextFrame)
+            {
+                NextJump = CapJump;
+            }
+            else if( CoolDowns.ContainsKey("GroundPoundJumpOpening") )
+            {
+                NextJump = GroundpoundJump;
+                CoolDowns["GroundPoundJumpOpening"] = 0f;
+            }
+            else if(CoolDowns.ContainsKey("ResetJump"))
+            {
+                if( LastJump.Equals(FirstJump) )
+                {
+                    NextJump = SecondJump;
+                    LastSecondJumpDirection = InputDirection; 
+                }
+                else if( LastJump.Equals(SecondJump) && Velocity.Length() >= MaxRunningVelocity * 0.8f )
+                {
+                    if (LastSecondJumpDirection != Vector3.Zero)
+                    {
+                        // only triple jump if the angle changed since second jump is less and 90 degrees
+                        float angle = Mathf.Acos(LastSecondJumpDirection.Dot(InputDirection));
+                        if (angle <= Mathf.Pi / 2)
+                        {
+                            NextJump = ThirdJump;
+                        }
+                    }
+                }
+            }
+            LastJump = NextJump;
+            newVelocity.Y = NextJump.NewJumpVelocity;
+            CoolDowns["ResetJump"] = MultiJumpResetCooldown;
+            var currentHorizontalVelocity = new Vector3(newVelocity.X,0,newVelocity.Z);
+            MaxVelocity = currentHorizontalVelocity.Length() < MaxRunningVelocity ? MaxRunningVelocity : currentHorizontalVelocity.Length();
+            CapJumpNextFrame = false;
+        }
+        else if(Input.IsActionPressed("GroundPound") && Input.GetActionStrength("GroundPound") >= 1f && !IsDiving && !IsOnFloor() && !IsOnWallOnly() )
+        {
+            if (!CoolDowns.ContainsKey("GroundPoundFreeze") && !IsGroundPounding)
+            {
+                CoolDowns["GroundPoundFreeze"] = GroundPoundFreezeLength;
+            }
+        }
+        
+        if (Input.IsActionJustPressed("CapThrow") && !IsDiving && !IsOnWallOnly() )
+        {
+            if((CoolDowns.ContainsKey("GroundPoundFreeze") || IsGroundPounding) && !IsOnFloor())
+            {
+                IsGroundPounding = false;
+                if(CoolDowns.ContainsKey("GroundPoundFreeze"))
+                {
+                    CoolDowns["GroundPoundFreeze"] = 0f;
+                }
+                newVelocity.Y = DiveVelocity / 2 ;
+                newVelocity.X = (IsMoving ? InputDirection : -GlobalTransform.Basis.Z).X * DiveVelocity;
+                newVelocity.Z = (IsMoving ? InputDirection : -GlobalTransform.Basis.Z).Z * DiveVelocity;
+                MaxVelocity = DiveVelocity;
+                if (IsMoving)
+                    LookAt(GlobalPosition + InputDirection);
+                IsDiving = true;
+            }
+            else if(!CoolDowns.ContainsKey("Stalling"))
+            {
+                Stall(ref newVelocity);
+                CoolDowns["Stalling"] = CapThrowCoolDown;
+                Cap.Throw();
+            }
+        }
+
+        if(IsOnWallOnly() && !IsDiving && newVelocity.Y <= 5)
+        {
+            newVelocity.X = 0;
+            newVelocity.Z = 0;
+            newVelocity.Y = -1;
+
+            LookAt(GlobalPosition + GetWallNormal() + InputDirection * new Vector3(0.8f,0f,0.8f));
+            
+            if(CoolDowns.ContainsKey("CoyoteJumpOpening"))
+            {
+                newVelocity.Y = WallKickMinVelocity;
+                newVelocity.X = -GlobalTransform.Basis.Z.X * WallKickMinVelocity;
+                newVelocity.Z = -GlobalTransform.Basis.Z.Z * WallKickMinVelocity;
+                CoolDowns["ResetJump"] = 0f;
+                IsGroundPounding = false;
+                if( CoolDowns.ContainsKey("GroundPoundFreeze") )
+                {
+                    CoolDowns["GroundPoundFreeze"] = 0;
+                }
+                MaxVelocity = Math.Max(WallKickMinVelocity, MaxVelocity);
+            }
+        }
+
+        Velocity = newVelocity;
+        MoveAndSlide();
+    }
+    private void Stall(ref Vector3 newVelocity)
+    {
+        newVelocity.X *= 0.2f;
+        if (!IsOnFloor())
+            newVelocity.Y = 6f;
+        newVelocity.Z *= 0.2f;
+    }
+}

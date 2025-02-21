@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4q7d2e18mfpf"]
+
+[ext_resource type="PackedScene" uid="uid://cgrak1mm488li" path="res://CapModel.glb" id="1_40su6"]
+
+[node name="CapModel" instance=ExtResource("1_40su6")]
+
+[node name="Cube_009" parent="." index="0"]
+transform = Transform3D(-0.211, -1.31134e-08, 0, 7.41441e-09, -0.0602922, -0.0384578, 1.68905e-08, -0.137349, 0.0168818, 0, 0.0752845, -0.27016)
