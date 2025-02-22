@@ -77,12 +77,12 @@ public partial class PlayerController : CharacterBody3D
         {
             realAcceleration *= AirAccelerationMultiplier;
         }
-        realAcceleration = realAcceleration * MaxGroundVelocity / MaxVelocity; // limit input control depending on player speed
+        realAcceleration = realAcceleration * MaxGroundVelocity / Mathf.Max(MaxGroundVelocity,MaxVelocity * 0.5f); // limit input control depending on player speed
         Vector3 targetVelocity = InputDirection * MaxVelocity * inputDir.Length();
         newVelocity.X = Mathf.MoveToward(newVelocity.X, targetVelocity.X, realAcceleration * (float)delta);
         newVelocity.Y += GetGravity().Y * (float)delta;
         newVelocity.Z = Mathf.MoveToward(newVelocity.Z, targetVelocity.Z, realAcceleration * (float)delta);
-		
+
         if (newVelocity.Length() > 0f && !CoolDowns.ContainsKey("GroundPoundFreeze"))
         {
             Vector3 lessYInfluenceVelocity = IsOnFloor()  ? newVelocity.Normalized() : InputDirection;
