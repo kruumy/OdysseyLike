@@ -1,10 +1,10 @@
 [gd_scene load_steps=9 format=3 uid="uid://bwv2cufs317vo"]
 
-[ext_resource type="Script" path="res://PlayerController.cs" id="1_v0vgt"]
-[ext_resource type="Script" path="res://CameraController.cs" id="2_pthmj"]
+[ext_resource type="Script" path="res://Scripts/PlayerController.cs" id="1_v0vgt"]
+[ext_resource type="Script" path="res://Scripts/CameraController.cs" id="2_pthmj"]
 [ext_resource type="PackedScene" uid="uid://btmi0bfg8imx" path="res://CapModel.blend" id="3_7k0g7"]
-[ext_resource type="Script" path="res://DebugLabel.cs" id="3_xrj7u"]
-[ext_resource type="Script" path="res://Cap.cs" id="4_ofus5"]
+[ext_resource type="Script" path="res://Scripts/DebugLabel.cs" id="3_xrj7u"]
+[ext_resource type="Script" path="res://Scripts/Cap.cs" id="4_ofus5"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_qjcy0"]
 height = 1.065
