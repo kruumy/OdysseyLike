@@ -24,9 +24,9 @@ namespace Scripts
 				$"{nameof(Player.IsOnWallOnly)}: {Player.IsOnWallOnly()}\n" +
 				$"Velocity: {new Vector3(Player.Velocity.X, 0, Player.Velocity.Z).Length():F2} / {Player.CurrentState.MaxSpeed:F2}\n" +
 				$"{nameof(PlayerState.Jump.LastJump)}: {PlayerState.Jump.LastJump.VelocityMultiplier}";
-			foreach (var key in PlayerState.State.CoolDowns.Keys)
+			foreach (var key in Player.CoolDowns.Keys)
 			{
-				Text += $"\n{key}: {Mathf.RoundToInt(PlayerState.State.CoolDowns[key] * 10)}";
+				Text += $"\n{key}: {Mathf.RoundToInt(Player.CoolDowns[key] * 10)}";
 			}
 			
 		}

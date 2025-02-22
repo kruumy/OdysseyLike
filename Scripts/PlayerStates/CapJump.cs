@@ -8,7 +8,7 @@ namespace Scripts.PlayerState
         protected override void UpdateVelocity(ref Vector3 newVelocity, float delta)
         {
             newVelocity.Y = CapJumpVelocity.NewJumpVelocity;
-            CoolDowns.Remove("ResetJump");
+            Player.CoolDowns.Remove("ResetJump");
             Player.CurrentState = new Idle();
         }
     }

@@ -8,8 +8,7 @@ namespace Scripts.PlayerState
     {
         public PlayerController Player;
         public Vector3 InputDirection = Vector3.Zero;
-        public static Dictionary<string,float> CoolDowns = new();
-        public static HashSet<string> CoolDownsFinishedThisFrame = new();
+
         public const float GroundAcceleration = 50f;
         public const float AirAcceleration = 25f;
         public const float MaxGroundSpeed = 8f;
@@ -18,17 +17,6 @@ namespace Scripts.PlayerState
         public Vector3 HorizontalVelocity => new Vector3(Player.Velocity.X,0f,Player.Velocity.Z);
         public void Update(float delta)
         {
-            CoolDownsFinishedThisFrame.Clear();
-            foreach (var key in CoolDowns.Keys)
-            {
-                CoolDowns[key] -= (float)delta;
-                if (CoolDowns[key] <= 0)
-                {
-                    CoolDowns.Remove(key);
-                    CoolDownsFinishedThisFrame.Add(key);
-                }
-            }
-
             if(Player.IsOnWallOnly() && Player.CurrentState is not WallGrab)
             {
                 Player.CurrentState = new WallGrab();
@@ -69,7 +57,7 @@ namespace Scripts.PlayerState
         {
             if(@event.IsActionPressed("Jump"))
             {
-                CoolDowns["CoyoteJumpOpening"] = Jump.CoyoteJumpOpeningCoolDown;
+                Player.CoolDowns["CoyoteJumpOpening"] = Jump.CoyoteJumpOpeningCoolDown;
             }
             else if(
                 @event.IsActionPressed("CapThrow") && 

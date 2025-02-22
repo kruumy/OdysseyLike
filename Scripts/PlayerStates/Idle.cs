@@ -4,7 +4,7 @@ namespace Scripts.PlayerState
     {
         protected override void PostUpdate()
         {
-            if(CoolDowns.ContainsKey("CoyoteJumpOpening") && Player.IsOnFloor())
+            if(Player.CoolDowns.ContainsKey("CoyoteJumpOpening") && Player.IsOnFloor())
             {
                 Player.CurrentState = new Jump();
             }

@@ -21,13 +21,13 @@ namespace Scripts.PlayerState
         public static readonly JumpMultiplier GroundPoundJump = new(1.4f);
         protected override void UpdateVelocity(ref Vector3 newVelocity, float delta)
         {
-            CoolDowns.Remove("CoyoteJumpOpening");
+            Player.CoolDowns.Remove("CoyoteJumpOpening");
             JumpMultiplier NextJump = FirstJump;
-            if(CoolDowns.ContainsKey("GroundPoundJumpOpening"))
+            if(Player.CoolDowns.ContainsKey("GroundPoundJumpOpening"))
             {
                 NextJump = GroundPoundJump;
             }
-            else if(CoolDowns.ContainsKey("ResetJump"))
+            else if(Player.CoolDowns.ContainsKey("ResetJump"))
             {
                 if( LastJump.Equals(FirstJump) )
                 {
@@ -50,7 +50,7 @@ namespace Scripts.PlayerState
                 Player.LookAt(Player.GlobalPosition + InputDirection);
             }
             newVelocity.Y = NextJump.NewJumpVelocity;
-            CoolDowns["ResetJump"] = MultiJumpResetCooldown;
+            Player.CoolDowns["ResetJump"] = MultiJumpResetCooldown;
             Player.CurrentState = new Idle();
         }
     }

@@ -16,7 +16,7 @@ namespace Scripts.PlayerState
             newVelocity.Y = WallKickYVelocity;
             newVelocity.X = -Player.GlobalTransform.Basis.Z.X * WallKickSpeed;
             newVelocity.Z = -Player.GlobalTransform.Basis.Z.Z * WallKickSpeed;
-            CoolDowns.Remove("ResetJump");
+            Player.CoolDowns.Remove("ResetJump");
             Player.CurrentState = new Idle();
         }
     }

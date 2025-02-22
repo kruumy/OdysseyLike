@@ -7,9 +7,9 @@ namespace Scripts.PlayerState
         public const float GroundPoundFreezeLength = 0.5f;
         protected override void UpdateVelocity(ref Vector3 newVelocity, float delta)
         {
-            if (!CoolDowns.ContainsKey("GroundPoundFreeze"))
+            if (!Player.CoolDowns.ContainsKey("GroundPoundFreeze"))
             {
-                CoolDowns["GroundPoundFreeze"] = GroundPoundFreezeLength;
+                Player.CoolDowns["GroundPoundFreeze"] = GroundPoundFreezeLength;
             }
             else
             {
@@ -20,7 +20,7 @@ namespace Scripts.PlayerState
         }
         protected override void PostUpdate()
         {
-            if(CoolDownsFinishedThisFrame.Contains("GroundPoundFreeze"))
+            if(Player.CoolDownsFinishedThisFrame.Contains("GroundPoundFreeze"))
             {
                 Player.CurrentState = new GroundPound();
             }

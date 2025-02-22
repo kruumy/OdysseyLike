@@ -9,7 +9,7 @@ namespace Scripts.PlayerState
         {
             if(Player.Cap.IsThrown)
             {
-                CoolDowns.Remove("GroundPoundFreeze");
+                Player.CoolDowns.Remove("GroundPoundFreeze");
                 Vector3 directionToCap = Player.Cap.GlobalPosition - Player.GlobalPosition;
                 newVelocity = directionToCap.Normalized() * Mathf.Max(newVelocity.Length(), CapPullVelocity) ;
             }

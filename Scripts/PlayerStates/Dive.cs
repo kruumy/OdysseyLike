@@ -15,8 +15,8 @@ namespace Scripts.PlayerState
         {
             if(HasPerformedDive)
                 return;
-            CoolDowns.Remove("GroundPoundFreeze");
-            CoolDowns.Remove("ResetJump");
+            Player.CoolDowns.Remove("GroundPoundFreeze");
+            Player.CoolDowns.Remove("ResetJump");
             newVelocity.Y = DiveVelocity / 2 ;
             newVelocity.X = (InputDirection != Vector3.Zero ? InputDirection : -Player.GlobalTransform.Basis.Z).X * DiveVelocity;
             newVelocity.Z = (InputDirection != Vector3.Zero ? InputDirection : -Player.GlobalTransform.Basis.Z).Z * DiveVelocity;

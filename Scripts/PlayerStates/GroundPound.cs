@@ -14,7 +14,7 @@ namespace Scripts.PlayerState
         {
             if(Player.IsOnFloor())
             {
-                CoolDowns["GroundPoundJumpOpening"] = GroundPoundJumpOpeningCoolDown;
+                Player.CoolDowns["GroundPoundJumpOpening"] = GroundPoundJumpOpeningCoolDown;
                 Player.CurrentState = new Idle();
             }
         }
