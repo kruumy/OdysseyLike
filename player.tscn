@@ -21,7 +21,7 @@ height = 1.0
 
 [node name="CameraController" type="SpringArm3D" parent="." node_paths=PackedStringArray("Target")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 0, 0)
-spring_length = 5.0
+spring_length = 7.0
 script = ExtResource("2_pthmj")
 Target = NodePath("../PlayerController")
 
