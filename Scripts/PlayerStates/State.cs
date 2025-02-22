@@ -36,8 +36,13 @@ namespace Scripts.PlayerState
 
             Vector3 newVelocity = Player.Velocity;
             Vector2 inputDir = Godot.Input.GetVector("Left", "Right", "Forward", "Backward");
-            InputDirection = Player.Camera.GlobalTransform.Basis * new Vector3(inputDir.X, 0, inputDir.Y);
-            InputDirection.Y = 0; 
+
+            Vector3 forward = -Player.Camera.GlobalTransform.Basis.Z;
+            forward.Y = 0;
+            Vector3 right = Player.Camera.GlobalTransform.Basis.X;
+            right.Y = 0;
+
+            InputDirection = (right.Normalized() * inputDir.X) - (forward.Normalized() * inputDir.Y); // input direction according to camera forward's horizontal components
             InputDirection = InputDirection.Normalized();
 
             MaxSpeed = Player.IsOnFloor() ? MaxGroundSpeed : Math.Max(MinAirMaxSpeed,HorizontalVelocity.Length());
