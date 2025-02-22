@@ -17,7 +17,9 @@ namespace Scripts.PlayerState
         public Vector3 HorizontalVelocity => new Vector3(Player.Velocity.X,0f,Player.Velocity.Z);
         public void Update(float delta)
         {
-            if(Player.IsOnWallOnly() && Player.CurrentState is not WallGrab)
+            if(
+                Player.IsOnWallOnly() && 
+                (Player.CurrentState is Idle || Player.CurrentState is Dive))
             {
                 Player.CurrentState = new WallGrab();
             }
