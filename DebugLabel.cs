@@ -22,7 +22,7 @@ public partial class DebugLabel : Label3D
 		       $"{nameof(Player.IsOnFloor)}: {Player.IsOnFloor()}\n" +
 			   $"{nameof(Player.IsOnWallOnly)}: {Player.IsOnWallOnly()}\n" +
 		       $"{nameof(Player.IsGroundPounding)}: {Player.IsGroundPounding}\n" +
-		       $"Velocity: {new Vector3(Player.Velocity.X, 0, Player.Velocity.Z).Length():F2} / {Player.MaxVelocity:F2}\n" +
+		       $"Velocity: {new Vector3(Player.Velocity.X, 0, Player.Velocity.Z).Length():F2} / {Player.VelocityLeavingGround:F2}\n" +
 			   $"{nameof(Player.LastJump)}: {Player.LastJump.VelocityMultiplier}";
 
 		foreach (var key in Player.CoolDowns.Keys)

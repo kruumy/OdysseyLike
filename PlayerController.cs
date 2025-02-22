@@ -1,15 +1,14 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 
 public partial class PlayerController : CharacterBody3D
 {
     [Export] public Node3D Camera;
 	[Export] public Cap Cap;
     public bool Active = true;
-    public const float MaxRunningVelocity = 7.0f;
-    public const float Acceleration = 30.0f;
+    public const float MaxGroundVelocity = 7.0f;
+    public const float Acceleration = 50.0f;
     public readonly struct JumpMultiplier
     {
         public const float BaseJumpVelocity = 12.0f;
@@ -29,7 +28,7 @@ public partial class PlayerController : CharacterBody3D
     public const float MultiJumpResetCooldown = 2f;
 	public const float AirAccelerationMultiplier = 0.5f;
 	public Vector3 InputDirection = Vector3.Zero;
-	public bool IsMoving => InputDirection != Vector3.Zero;
+	public bool IsInputMoving => InputDirection != Vector3.Zero;
     public bool CapJumpNextFrame = false;
     public bool IsDiving = false;
     public const float DivingAccelerationMultiplier = 0.1f;
@@ -42,9 +41,9 @@ public partial class PlayerController : CharacterBody3D
     public bool IsGroundPounding = false;
     public float GroundPoundFreezeLength = 0.5f;
     public bool IsBonked = false;
-    public float MaxVelocity = MaxRunningVelocity;
     public bool IsCapPulling = false;
     public float ReturnToRunningDeceleration = 4f;
+    public float VelocityLeavingGround = MaxGroundVelocity;
     private Vector3 LastSecondJumpDirection = Vector3.Zero; 
     public override void _Process(double delta)
     {
@@ -80,14 +79,16 @@ public partial class PlayerController : CharacterBody3D
             realAcceleration *= AirAccelerationMultiplier;
         }
 
-        Vector3 targetVelocity = InputDirection * MaxVelocity * inputDir.Length();
+        Vector3 targetVelocity = InputDirection * (IsOnFloor() ? MaxGroundVelocity : VelocityLeavingGround) * inputDir.Length();
         newVelocity.X = Mathf.MoveToward(newVelocity.X, targetVelocity.X, realAcceleration * (float)delta);
         newVelocity.Y += GetGravity().Y * (float)delta;
         newVelocity.Z = Mathf.MoveToward(newVelocity.Z, targetVelocity.Z, realAcceleration * (float)delta);
 		
-        if (IsMoving && !CoolDowns.ContainsKey("GroundPoundFreeze"))
+        if (newVelocity.Length() > 0f && !CoolDowns.ContainsKey("GroundPoundFreeze"))
         {
-            GlobalTransform = GlobalTransform.InterpolateWith(GlobalTransform.LookingAt( GlobalPosition + InputDirection ), (float)delta * realAcceleration );
+            Vector3 lessYInfluenceVelocity = IsOnFloor()  ? newVelocity.Normalized() : InputDirection;
+            lessYInfluenceVelocity.Y = 0; 
+            GlobalTransform = GlobalTransform.InterpolateWith(GlobalTransform.LookingAt( GlobalPosition + -GlobalTransform.Basis.Z + lessYInfluenceVelocity ), (float)delta * realAcceleration );
         }
 
         if(CoolDownsRemovedThisFrame.Contains("GroundPoundFreeze") && !IsDiving)
@@ -119,7 +120,7 @@ public partial class PlayerController : CharacterBody3D
             if(Cap.IsThrown)
             {
                 Vector3 directionToCap = Cap.GlobalPosition - GlobalPosition;
-                newVelocity = directionToCap.Normalized() * Mathf.Max(MaxVelocity, DiveVelocity * 2f) ;
+                newVelocity = directionToCap.Normalized() * Mathf.Max(newVelocity.Length(), DiveVelocity * 2f) ;
             }
             else
             {
@@ -133,10 +134,7 @@ public partial class PlayerController : CharacterBody3D
             {
                 CoolDowns["GroundPoundJumpOpening"] = GroundPoundJumpOpeningCoolDown;
             }
-            IsGroundPounding = false;
-            
-            MaxVelocity = Mathf.MoveToward( MaxVelocity, MaxRunningVelocity, ReturnToRunningDeceleration * Math.Max(1,Math.Abs(  MaxVelocity - newVelocity.Length() )) * (float)delta );
-            
+            IsGroundPounding = false;      
         }
         
         
@@ -162,7 +160,7 @@ public partial class PlayerController : CharacterBody3D
                     NextJump = SecondJump;
                     LastSecondJumpDirection = InputDirection; 
                 }
-                else if( LastJump.Equals(SecondJump) && Velocity.Length() >= MaxRunningVelocity * 0.8f )
+                else if( LastJump.Equals(SecondJump) && Velocity.Length() >= MaxGroundVelocity * 0.8f )
                 {
                     if (LastSecondJumpDirection != Vector3.Zero)
                     {
@@ -176,11 +174,15 @@ public partial class PlayerController : CharacterBody3D
                 }
             }
             LastJump = NextJump;
+            if(InputDirection != Vector3.Zero)
+            {
+                LookAt(GlobalPosition + InputDirection);
+            }
             newVelocity.Y = NextJump.NewJumpVelocity;
             CoolDowns["ResetJump"] = MultiJumpResetCooldown;
             var currentHorizontalVelocity = new Vector3(newVelocity.X,0,newVelocity.Z);
-            MaxVelocity = currentHorizontalVelocity.Length() < MaxRunningVelocity ? MaxRunningVelocity : currentHorizontalVelocity.Length();
             CapJumpNextFrame = false;
+            VelocityLeavingGround = Math.Max(currentHorizontalVelocity.Length(), MaxGroundVelocity);
         }
         else if(Input.IsActionPressed("GroundPound") && Input.GetActionStrength("GroundPound") >= 1f && !IsDiving && !IsOnFloor() && !IsOnWallOnly() )
         {
@@ -200,18 +202,20 @@ public partial class PlayerController : CharacterBody3D
                     CoolDowns["GroundPoundFreeze"] = 0f;
                 }
                 newVelocity.Y = DiveVelocity / 2 ;
-                newVelocity.X = (IsMoving ? InputDirection : -GlobalTransform.Basis.Z).X * DiveVelocity;
-                newVelocity.Z = (IsMoving ? InputDirection : -GlobalTransform.Basis.Z).Z * DiveVelocity;
-                MaxVelocity = DiveVelocity;
-                if (IsMoving)
+                newVelocity.X = (IsInputMoving ? InputDirection : -GlobalTransform.Basis.Z).X * DiveVelocity;
+                newVelocity.Z = (IsInputMoving ? InputDirection : -GlobalTransform.Basis.Z).Z * DiveVelocity;
+                if (IsInputMoving)
                     LookAt(GlobalPosition + InputDirection);
+                VelocityLeavingGround = DiveVelocity;
                 IsDiving = true;
             }
             else if(!CoolDowns.ContainsKey("Stalling"))
             {
-                Stall(ref newVelocity);
+                if( !IsOnFloor() )
+                    AirStall(ref newVelocity);
                 CoolDowns["Stalling"] = CapThrowCoolDown;
                 Cap.Throw();
+                VelocityLeavingGround = DiveVelocity;
             }
         }
 
@@ -225,27 +229,27 @@ public partial class PlayerController : CharacterBody3D
             
             if(CoolDowns.ContainsKey("CoyoteJumpOpening"))
             {
-                newVelocity.Y = WallKickMinVelocity;
-                newVelocity.X = -GlobalTransform.Basis.Z.X * WallKickMinVelocity;
-                newVelocity.Z = -GlobalTransform.Basis.Z.Z * WallKickMinVelocity;
+                float wallKickSpeed = Math.Max(WallKickMinVelocity, VelocityLeavingGround);
+                newVelocity.Y = wallKickSpeed;
+                newVelocity.X = -GlobalTransform.Basis.Z.X * wallKickSpeed;
+                newVelocity.Z = -GlobalTransform.Basis.Z.Z * wallKickSpeed;
+                VelocityLeavingGround = wallKickSpeed;
                 CoolDowns["ResetJump"] = 0f;
                 IsGroundPounding = false;
                 if( CoolDowns.ContainsKey("GroundPoundFreeze") )
                 {
                     CoolDowns["GroundPoundFreeze"] = 0;
                 }
-                MaxVelocity = Math.Max(WallKickMinVelocity, MaxVelocity);
             }
         }
 
         Velocity = newVelocity;
         MoveAndSlide();
     }
-    private void Stall(ref Vector3 newVelocity)
+    private void AirStall(ref Vector3 newVelocity)
     {
         newVelocity.X *= 0.2f;
-        if (!IsOnFloor())
-            newVelocity.Y = 6f;
+        newVelocity.Y = 6f;
         newVelocity.Z *= 0.2f;
     }
 }

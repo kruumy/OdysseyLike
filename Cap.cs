@@ -14,9 +14,10 @@ public partial class Cap : Area3D
 	public void Throw()
 	{
 		IsThrown = true;
-		var temp = Player.GlobalPosition + ((Player.IsMoving ? Player.InputDirection : -Player.GlobalTransform.Basis.Z) * ThrowDistance);
+		this.Rotation = Vector3.Zero;
+		var temp = Player.GlobalPosition + ((Player.IsInputMoving ? Player.InputDirection : -Player.GlobalTransform.Basis.Z) * ThrowDistance);
 		AnimateCapThrow(temp,new Vector3(1f,0.75f,1f), 0.2f);
-		if(Player.IsMoving)
+		if(Player.IsInputMoving)
 			Player.LookAt(Player.GlobalPosition + Player.InputDirection);
 	}
 	public void Return()
