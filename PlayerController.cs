@@ -232,7 +232,7 @@ public partial class PlayerController : CharacterBody3D
             if(CoolDowns.ContainsKey("CoyoteJumpOpening"))
             {
                 float wallKickSpeed = Math.Max(WallKickMinVelocity, MaxVelocity);
-                newVelocity.Y = wallKickSpeed;
+                newVelocity.Y = WallKickMinVelocity;
                 newVelocity.X = -GlobalTransform.Basis.Z.X * wallKickSpeed;
                 newVelocity.Z = -GlobalTransform.Basis.Z.Z * wallKickSpeed;
                 MaxVelocity = wallKickSpeed;
