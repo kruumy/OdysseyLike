@@ -43,7 +43,8 @@ public partial class PlayerController : CharacterBody3D
     public float GroundPoundFreezeLength = 0.5f;
     public bool IsBonked = false;
     public float MaxVelocity = MaxRunningVelocity;
-    public float ReturnToRunningDeceleration = 2f;
+    public bool IsCapPulling = false;
+    public float ReturnToRunningDeceleration = 4f;
     private Vector3 LastSecondJumpDirection = Vector3.Zero; 
     public override void _Process(double delta)
     {
@@ -105,7 +106,26 @@ public partial class PlayerController : CharacterBody3D
         {
             CoolDowns["CoyoteJumpOpening"] = CoyoteJumpOpeningCoolDown;
         }
-
+        
+        if (Input.IsActionJustPressed("CapPull") && Cap.IsThrown)
+        {
+            IsCapPulling = true;
+            IsDiving = false;
+            CoolDowns.Remove("GroundPoundFreeze");
+            IsGroundPounding = false;
+        }
+        if(IsCapPulling)
+        {
+            if(Cap.IsThrown)
+            {
+                Vector3 directionToCap = Cap.GlobalPosition - GlobalPosition;
+                newVelocity = directionToCap.Normalized() * Mathf.Max(MaxVelocity, DiveVelocity * 2f) ;
+            }
+            else
+            {
+                IsCapPulling = false;
+            }
+        }
         if(IsOnFloor() || CapJumpNextFrame )
         {
             IsDiving = false;
@@ -115,7 +135,7 @@ public partial class PlayerController : CharacterBody3D
             }
             IsGroundPounding = false;
             
-            MaxVelocity = Mathf.MoveToward( MaxVelocity, MaxRunningVelocity, ReturnToRunningDeceleration * (float)delta );
+            MaxVelocity = Mathf.MoveToward( MaxVelocity, MaxRunningVelocity, ReturnToRunningDeceleration * Math.Max(1,Math.Abs(  MaxVelocity - newVelocity.Length() )) * (float)delta );
             
         }
         

@@ -17,6 +17,8 @@ public partial class DebugLabel : Label3D
 		GlobalPosition = Player.GlobalPosition + Vector3.Up * 1.7f;
 		Text = $"{nameof(Player.IsDiving)}: {Player.IsDiving}\n" +
 		       $"{nameof(Cap.CanCapJump)}: {Cap.CanCapJump}\n" +
+		       $"{nameof(Cap.IsThrown)}: {Cap.IsThrown}\n" +
+		       $"{nameof(Player.IsCapPulling)}: {Player.IsCapPulling}\n" +
 		       $"{nameof(Player.IsOnFloor)}: {Player.IsOnFloor()}\n" +
 			   $"{nameof(Player.IsOnWallOnly)}: {Player.IsOnWallOnly()}\n" +
 		       $"{nameof(Player.IsGroundPounding)}: {Player.IsGroundPounding}\n" +
