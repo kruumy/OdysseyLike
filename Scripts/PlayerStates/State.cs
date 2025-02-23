@@ -67,7 +67,9 @@ namespace Scripts.PlayerState
             {
                 Player.CurrentState = new CapThrow();
             }
-            else if(@event.IsActionPressed("CapPull"))
+            else if(
+                @event.IsActionPressed("CapPull") &&
+                (Player.CurrentState is Idle || Player.CurrentState is GroundPoundFreeze))
             {
                 Player.CurrentState = new CapPull();
             }
