@@ -42,7 +42,7 @@ namespace Scripts
 
         public void Return()
         {
-            Scale = new Vector3(0.5f, 0.5f, 0.5f);
+            Scale = CapPoint.Scale;
             IsThrown = false;
         }
 
