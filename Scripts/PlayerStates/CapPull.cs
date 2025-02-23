@@ -11,7 +11,8 @@ namespace Scripts.PlayerState
             if(Player.Cap.IsThrown && Player.Cap.CanCapPull)
             {
                 Player.CoolDowns.Remove("GroundPoundFreeze");
-                Player.CoolDowns.Remove("CapThrowCooldown");
+                if(Player.IsOnFloor())
+                    Player.CoolDowns.Remove("CapThrowCooldown");
                 Vector3 directionToCap = Player.Cap.GlobalPosition - Player.GlobalPosition;
                 if (directionToCap.Length() > MinDistanceToCap)
                 {
@@ -23,7 +24,7 @@ namespace Scripts.PlayerState
                 if(!Player.IsOnFloor())
                     Player.Cap.CanCapPull = false; 
                 
-                if(Godot.Input.IsActionPressed("CapThrow"))
+                if(Godot.Input.IsActionPressed("CapThrow") && Player.IsOnFloor())
                     Player.CurrentState = new CapThrow();
                 else
                     Player.CurrentState = new Idle();

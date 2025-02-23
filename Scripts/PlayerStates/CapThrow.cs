@@ -36,7 +36,7 @@ namespace Scripts.PlayerState
                 Player.Cap.Throw(throwDirection);
                 Player.CoolDowns["CapThrowCooldown"]  = CapThrowCoolDown;
             }
-            Player.CurrentState = Player.LastState;
+            Player.CurrentState = Player.LastState is CapThrow ? new Idle() : Player.LastState;
         }
     }
 }
