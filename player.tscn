@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://bwv2cufs317vo"]
+[gd_scene load_steps=10 format=3 uid="uid://bwv2cufs317vo"]
 
 [ext_resource type="Script" path="res://Scripts/PlayerController.cs" id="1_v0vgt"]
 [ext_resource type="Script" path="res://Scripts/CameraController.cs" id="2_pthmj"]
 [ext_resource type="PackedScene" uid="uid://btmi0bfg8imx" path="res://CapModel.blend" id="3_7k0g7"]
 [ext_resource type="Script" path="res://Scripts/DebugLabel.cs" id="3_xrj7u"]
 [ext_resource type="Script" path="res://Scripts/Cap.cs" id="4_ofus5"]
+[ext_resource type="Script" path="res://Scripts/VelocityTilter.cs" id="6_ih4e4"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_qjcy0"]
 height = 1.065
@@ -33,7 +34,7 @@ size = 0.048
 [node name="Cap" type="Area3D" parent="." node_paths=PackedStringArray("Player", "CapPoint")]
 script = ExtResource("4_ofus5")
 Player = NodePath("../PlayerController")
-CapPoint = NodePath("../PlayerController/CapPoint")
+CapPoint = NodePath("../PlayerController/MeshInstance3D/CapPoint")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Cap"]
 shape = SubResource("CylinderShape3D_qjcy0")
@@ -55,11 +56,12 @@ metadata/_edit_group_ = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PlayerController"]
 mesh = SubResource("BoxMesh_1qmv6")
+script = ExtResource("6_ih4e4")
+
+[node name="CapPoint" type="Node3D" parent="PlayerController/MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.283137, -0.0758043)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerController"]
 shape = SubResource("CapsuleShape3D_a7k5x")
-
-[node name="CapPoint" type="Node3D" parent="PlayerController"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.283137, -0.0758043)
 
 [connection signal="body_entered" from="Cap" to="Cap" method="_on_body_entered"]
