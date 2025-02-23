@@ -16,7 +16,7 @@ namespace Scripts.PlayerState
             newVelocity.X = 0;
             newVelocity.Z = 0;
             newVelocity.Y = -1;
-            Player.LookAt(Player.GlobalPosition + Player.GetWallNormal() + InputDirection * new Vector3(0.8f,0f,0.8f));
+            Player.LookAt(Player.GlobalPosition + Player.GetWallNormal() + (InputDirection != Vector3.Zero ? InputDirection : Vector3.One) * new Vector3(0.8f,0f,0.8f));
             if(Player.CoolDowns.ContainsKey("CoyoteJumpOpening"))
             {
                 Player.CurrentState = new WallKick(SavedSpeed);
