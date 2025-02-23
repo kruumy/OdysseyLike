@@ -15,7 +15,25 @@ namespace Scripts.PlayerState
                     newVelocity.Y = 6f;
                     newVelocity.Z *= 0.2f;
                 }
-                Player.Cap.Throw();
+                
+                Cap.ThrowDirection throwDirection = Cap.ThrowDirection.None;
+                if(Godot.Input.IsActionPressed("CapThrowRight"))
+                {
+                    throwDirection = Cap.ThrowDirection.Right;
+                }
+                else if(Godot.Input.IsActionPressed("CapThrowLeft"))
+                {
+                    throwDirection = Cap.ThrowDirection.Left;
+                }
+                else if(Godot.Input.IsActionPressed("CapThrowDown"))
+                {
+                    throwDirection = Cap.ThrowDirection.Down;
+                }
+                else if(Godot.Input.IsActionPressed("CapThrowUp"))
+                {
+                    throwDirection = Cap.ThrowDirection.Up;
+                }
+                Player.Cap.Throw(throwDirection);
                 Player.CoolDowns["CapThrowCooldown"]  = CapThrowCoolDown;
             }
 
