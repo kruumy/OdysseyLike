@@ -15,6 +15,7 @@ namespace Scripts.PlayerState
         public const float MinAirMaxSpeed = 10f;
         public float MaxSpeed { get; private set; }
         public Vector3 HorizontalVelocity => new Vector3(Player.Velocity.X,0f,Player.Velocity.Z);
+        public virtual void Init(){}
         public void Update(float delta)
         {
             if(

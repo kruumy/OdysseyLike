@@ -19,6 +19,7 @@ namespace Scripts
                 value.Player = this;
                 LastState = currentState;
                 currentState = value;
+                currentState.Init();
             }
         }
         public override void _Ready()
