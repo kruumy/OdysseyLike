@@ -11,6 +11,7 @@ namespace Scripts
         public Node3D CapPoint;
         public const float ThrowDistance = 5f;
         public bool CanCapJump = true;
+        public bool CanCapPull = true;
         public bool IsThrown = false;
         public Tween CapThrowTween;
 
@@ -55,6 +56,7 @@ namespace Scripts
             if (Player.IsOnFloor())
             {
                 CanCapJump = true;
+                CanCapPull = true;
             }
 
             if (IsThrown)
