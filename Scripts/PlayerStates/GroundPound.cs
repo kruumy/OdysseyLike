@@ -4,7 +4,7 @@ namespace Scripts.PlayerState
 {
     public class GroundPound : GroundPoundBaseState
     {
-        public const float GroundPoundMultiplier = 0.5f;
+        public const float GroundPoundMultiplier = 0.75f;
         public const float GroundPoundJumpOpeningCoolDown = 0.4f;
         protected override void UpdateVelocity(ref Vector3 newVelocity, float delta)
         {
