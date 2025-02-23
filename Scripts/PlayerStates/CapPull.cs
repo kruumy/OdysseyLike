@@ -18,7 +18,7 @@ namespace Scripts.PlayerState
                 }
                 else
                 {
-                    Player.CurrentState = new Idle();
+                    Player.Cap.Return();
                 }
             }
             else
