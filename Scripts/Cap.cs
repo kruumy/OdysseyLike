@@ -9,7 +9,7 @@ namespace Scripts
         public PlayerController Player;
         [Export]
         public Node3D CapPoint;
-        public const float ThrowDistance = 5f;
+        public const float ThrowDistance = 6f;
         public bool CanCapJump = true;
         public bool CanCapPull = true;
         public bool IsThrown = false;
