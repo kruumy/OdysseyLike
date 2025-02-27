@@ -17,7 +17,8 @@ namespace Scripts
 				return;
 			}
 			GlobalPosition = Player.GlobalPosition + Vector3.Up * 1.7f;
-			Text = $"{nameof(Cap.CanCapJump)}: {Cap.CanCapJump}\n" +
+			Text = $"{nameof(Engine.GetFramesPerSecond)}: {Engine.GetFramesPerSecond()}\n" +
+				$"{nameof(Cap.CanCapJump)}: {Cap.CanCapJump}\n" +
 				$"{nameof(Cap.CanCapPull)}: {Cap.CanCapPull}\n" +
 				$"{Player.CurrentState}\n" +
 				$"{nameof(Cap.IsThrown)}: {Cap.IsThrown}\n" +
