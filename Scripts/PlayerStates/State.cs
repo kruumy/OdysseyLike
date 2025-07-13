@@ -12,7 +12,7 @@ namespace Scripts.PlayerState
         public const float GroundAcceleration = 50f;
         public const float AirAcceleration = 25f;
         public const float MaxGroundSpeed = 8f;
-        public const float MinAirMaxSpeed = 10f;
+        public const float MinAirMaxSpeed = 6f;
         public float MaxSpeed { get; private set; }
         public Vector3 HorizontalVelocity => new Vector3(Player.Velocity.X,0f,Player.Velocity.Z);
         public virtual void Init(){}

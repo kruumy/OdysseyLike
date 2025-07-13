@@ -34,7 +34,6 @@ ssao_enabled = true
 ssil_radius = 16.0
 ssil_intensity = 2.78
 sdfgi_cascades = 8
-sdfgi_max_distance = 3276.8
 glow_intensity = 2.69
 glow_strength = 1.5
 fog_mode = 1
@@ -74,13 +73,6 @@ environment = SubResource("Environment_217uu")
 transform = Transform3D(0.674869, -0.697873, 0.239844, -0.297587, 0.0400426, 0.953855, -0.675274, -0.715101, -0.180654, 0.053792, 16.7429, 0.433402)
 light_color = Color(1, 0.996078, 0.976471, 1)
 shadow_enabled = true
-
-[node name="OmniLight3D" type="OmniLight3D" parent="World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.48765, 7.75794, -6.36786)
-light_color = Color(1, 0.39, 0.501833, 1)
-light_energy = 2.082
-distance_fade_begin = 704.22
-omni_range = 22.3118
 
 [node name="Wall" type="StaticBody3D" parent="World"]
 transform = Transform3D(0.920587, 0, 0.390538, 0, 1, 0, -0.390538, 0, 0.920587, -3.22847, 6.48141, -11.4001)
